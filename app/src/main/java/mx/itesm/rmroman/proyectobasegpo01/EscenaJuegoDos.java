@@ -1,5 +1,7 @@
 package mx.itesm.rmroman.proyectobasegpo01;
 
+import android.util.Log;
+
 import org.andengine.entity.IEntity;
 import org.andengine.entity.modifier.JumpModifier;
 import org.andengine.entity.modifier.ParallelEntityModifier;
@@ -18,15 +20,13 @@ import java.util.ArrayList;
 /**
  * Created by rmroman on 15/09/15.
  */
-public class EscenaJuegoDos extends EscenaBase
-{
+public class EscenaJuegoDos extends EscenaBase {
     //Fondo
     private ITextureRegion regionFondo;
 
     // Sprite animado
     private AnimatedSprite spritePersonaje;
     private TiledTextureRegion regionPersonajeAnimado;
-
 
     // Banderas
     private boolean personajeSaltando = false;
@@ -36,13 +36,12 @@ public class EscenaJuegoDos extends EscenaBase
     private ArrayList<Enemigo> listaEnemigos;
     private ITextureRegion regionEnemigo;
 
-    // Tiempo para generar listaEnemigos
+    // Tiempo para generar enemigos
     private float tiempoEnemigos = 0;
     private float LIMITE_TIEMPO = 1.4f;
 
     // Fin del juego
     private ITextureRegion regionFin;
-
 
     // Proyectiles
     private ITextureRegion regionProyectil;
@@ -74,14 +73,14 @@ public class EscenaJuegoDos extends EscenaBase
         // Fondo animado
         AutoParallaxBackground fondoAnimado = new AutoParallaxBackground(1, 1, 1, 5);
 
-        Sprite spriteFondo = cargarSprite(ControlJuego.ANCHO_CAMARA/2,
-                ControlJuego.ALTO_CAMARA/2, regionFondo);
+        Sprite spriteFondo = cargarSprite(ControlJuego.ANCHO_CAMARA / 2,
+                ControlJuego.ALTO_CAMARA / 2, regionFondo);
         fondoAnimado.attachParallaxEntity(new ParallaxBackground.ParallaxEntity(-3, spriteFondo));
 
         setBackground(fondoAnimado);
 
         // Personaje animado
-        spritePersonaje = new AnimatedSprite(ControlJuego.ANCHO_CAMARA/8, ControlJuego.ALTO_CAMARA/8,
+        spritePersonaje = new AnimatedSprite(ControlJuego.ANCHO_CAMARA / 8, ControlJuego.ALTO_CAMARA / 8,
                 regionPersonajeAnimado, actividadJuego.getVertexBufferObjectManager());
         spritePersonaje.animate(200);
         attachChild(spritePersonaje);
@@ -93,10 +92,12 @@ public class EscenaJuegoDos extends EscenaBase
                 regionBtnPausa, actividadJuego.getVertexBufferObjectManager()) {
             @Override
             public boolean onAreaTouched(TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY) {
+                Log.i("onAreaTouched", "BTN Touch");
                 if (pSceneTouchEvent.isActionDown()) {
                     pausarJuego();
+                    return true;
                 }
-                return true; //super.onAreaTouched(pSceneTouchEvent, pTouchAreaLocalX, pTouchAreaLocalY);
+                return super.onAreaTouched(pSceneTouchEvent, pTouchAreaLocalX, pTouchAreaLocalY);
             }
         };
         attachChild(btnPausa);
@@ -104,15 +105,18 @@ public class EscenaJuegoDos extends EscenaBase
 
         // Crear la escena de PAUSA, pero NO lo agrega a la escena
         escenaPausa = new CameraScene(actividadJuego.camara);
-        Sprite fondoPausa = cargarSprite(ControlJuego.ANCHO_CAMARA/2, ControlJuego.ALTO_CAMARA/2,
+        Sprite fondoPausa = cargarSprite(ControlJuego.ANCHO_CAMARA / 2, ControlJuego.ALTO_CAMARA / 2,
                 regionPausa);
         escenaPausa.attachChild(fondoPausa);
         escenaPausa.setBackgroundEnabled(false);
+
+        setTouchAreaBindingOnActionDownEnabled(true);
     }
 
     private void pausarJuego() {
+        Log.i("pausarJuego", "pausando");
         if (juegoCorriendo) {
-            setChildScene(escenaPausa,false,true,false);
+            setChildScene(escenaPausa, false, true, false);
             juegoCorriendo = false;
         } else {
             clearChildScene();
@@ -121,8 +125,8 @@ public class EscenaJuegoDos extends EscenaBase
     }
 
     private void crearEnemigos() {
-        for(int x=700; x<=1200; x+=100) {
-            for(int y=100; y<=700; y+=100) {
+        for (int x = 700; x <= 1200; x += 100) {
+            for (int y = 100; y <= 700; y += 100) {
                 Sprite nave = cargarSprite(x, y, regionEnemigo);
                 attachChild(nave);
                 Enemigo enemigo = new Enemigo(nave);
@@ -146,18 +150,18 @@ public class EscenaJuegoDos extends EscenaBase
 
     private void actualizarProyectiles(float tiempo) {
 
-        for(int i=listaProyectiles.size()-1; i>=0; i--) {
+        for (int i = listaProyectiles.size() - 1; i >= 0; i--) {
             Sprite proyectil = listaProyectiles.get(i);
             proyectil.setX(proyectil.getX() + 10);
-            if ( proyectil.getX()>ControlJuego.ANCHO_CAMARA ) {
+            if (proyectil.getX() > ControlJuego.ANCHO_CAMARA) {
                 detachChild(proyectil);
                 listaProyectiles.remove(proyectil);
                 continue;
             }
             // probar si colisionó con un enemigo
-            for(int k=listaEnemigos.size()-1; k>=0; k--) {
+            for (int k = listaEnemigos.size() - 1; k >= 0; k--) {
                 Enemigo enemigo = listaEnemigos.get(k);
-                if ( proyectil.collidesWith(enemigo.getSpriteEnemigo()) ) {
+                if (proyectil.collidesWith(enemigo.getSpriteEnemigo())) {
                     // Lo destruye
                     detachChild(enemigo.getSpriteEnemigo());
                     listaEnemigos.remove(enemigo);
@@ -171,40 +175,38 @@ public class EscenaJuegoDos extends EscenaBase
     }
 
     private void actualizarEnemigos(float tiempo) {
-        for (Enemigo enemigo:listaEnemigos) {
-            enemigo.mover(-1,1);
+        for (Enemigo enemigo : listaEnemigos) {
+            enemigo.mover(-1, 1);
         }
     }
 
     @Override
     public boolean onSceneTouchEvent(TouchEvent pSceneTouchEvent) {
+        Log.i("onSceneTouch", "TOUCH");
 
-        if (!juegoCorriendo) {
-            return super.onSceneTouchEvent(pSceneTouchEvent);
-        }
+        if (juegoCorriendo) {
+            if (pSceneTouchEvent.isActionDown() && !personajeSaltando &&
+                    pSceneTouchEvent.getX() < ControlJuego.ANCHO_CAMARA / 2) {
 
-        if (pSceneTouchEvent.isActionDown() && !personajeSaltando &&
-                pSceneTouchEvent.getX()<ControlJuego.ANCHO_CAMARA/2) {
-
-            personajeSaltando = true;
-            // Animar sprite central
-            JumpModifier salto = new JumpModifier(2, spritePersonaje.getX(), spritePersonaje.getX(),
-                    spritePersonaje.getY(), spritePersonaje.getY(),-6*ControlJuego.ALTO_CAMARA/8);
-            RotationModifier rotacion = new RotationModifier(2, 360, 0);
-            ParallelEntityModifier paralelo = new ParallelEntityModifier(salto,rotacion)
-            {
-                @Override
-                protected void onModifierFinished(IEntity pItem) {
-                    personajeSaltando = false;
-                    unregisterEntityModifier(this);
-                    super.onModifierFinished(pItem);
+                personajeSaltando = true;
+                // Animar sprite central
+                JumpModifier salto = new JumpModifier(2, spritePersonaje.getX(), spritePersonaje.getX(),
+                        spritePersonaje.getY(), spritePersonaje.getY(), -6 * ControlJuego.ALTO_CAMARA / 8);
+                RotationModifier rotacion = new RotationModifier(2, 360, 0);
+                ParallelEntityModifier paralelo = new ParallelEntityModifier(salto, rotacion) {
+                    @Override
+                    protected void onModifierFinished(IEntity pItem) {
+                        personajeSaltando = false;
+                        unregisterEntityModifier(this);
+                        super.onModifierFinished(pItem);
+                    }
+                };
+                spritePersonaje.registerEntityModifier(paralelo);
+            } else if (pSceneTouchEvent.isActionDown() &&
+                    pSceneTouchEvent.getX() > ControlJuego.ANCHO_CAMARA / 2) {
+                if (listaProyectiles.size() < 3) {
+                    dispararProyectil();
                 }
-            };
-            spritePersonaje.registerEntityModifier(paralelo);
-        } else if (pSceneTouchEvent.isActionDown() &&
-                pSceneTouchEvent.getX()>ControlJuego.ANCHO_CAMARA/2) {
-            if (listaProyectiles.size()<3) {
-                dispararProyectil();
             }
         }
 
@@ -213,7 +215,7 @@ public class EscenaJuegoDos extends EscenaBase
 
     private void dispararProyectil() {
 
-            // Crearlo
+        // Crearlo
         Sprite spriteProyectil = cargarSprite(spritePersonaje.getX(), spritePersonaje.getY(), regionProyectil);
         attachChild(spriteProyectil);
         listaProyectiles.add(spriteProyectil);
@@ -240,8 +242,6 @@ public class EscenaJuegoDos extends EscenaBase
 
     @Override
     public void liberarRecursos() {
-        // Detiene el acelerómetro
-        //actividadJuego.getEngine().disableAccelerationSensor(actividadJuego);
 
         regionFondo.getTexture().unload();
         regionFondo = null;
@@ -251,6 +251,17 @@ public class EscenaJuegoDos extends EscenaBase
 
         regionProyectil.getTexture().unload();
         regionProyectil = null;
+
+        regionPersonajeAnimado.getTexture().unload();
+        regionPersonajeAnimado = null;
+        regionEnemigo.getTexture().unload();
+        regionEnemigo = null;
+        regionFin.getTexture().unload();
+        regionFin = null;
+        regionBtnPausa.getTexture().unload();
+        regionBtnPausa = null;
+        regionPausa.getTexture().unload();
+        regionPausa = null;
     }
 
 }
