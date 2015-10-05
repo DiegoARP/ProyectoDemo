@@ -22,21 +22,18 @@ public class EscenaMenu extends EscenaBase
 {
     // Regiones para las imágenes de la escena
     private ITextureRegion regionFondo;
-    private ITextureRegion regionBtnAcercaDe;
+    private ITextureRegion regionBtnAcercaDe;   // Botones del menú
     private ITextureRegion regionBtnJugar;
 
     // Sprites sobre la escena
     private Sprite spriteFondo;
 
-    // Un menú de tipo SceneMenu
-    private MenuScene menu;     // Contenedor de las opciones
+    // Un menú de tipo MenuScene
+    private MenuScene menu;
+
     // Constantes para cada opción
     private final int OPCION_ACERCA_DE = 0;
     private final int OPCION_JUGAR = 1;
-
-    // Botones de cada opción
-    private ButtonSprite btnAcercaDe;
-    private ButtonSprite btnJugar;
 
     @Override
     public void cargarRecursos() {
@@ -49,7 +46,7 @@ public class EscenaMenu extends EscenaBase
 
     @Override
     public void crearEscena() {
-        // Creamos el sprite de manera óptima
+        // Creamos el sprite de fondo
         spriteFondo = cargarSprite(ControlJuego.ANCHO_CAMARA/2, ControlJuego.ALTO_CAMARA/2, regionFondo);
 
         // Crea el fondo de la pantalla
@@ -59,7 +56,8 @@ public class EscenaMenu extends EscenaBase
 
         // Mostrar un recuadro atrás del menú
         agregarFondoMenu();
-        // Mostrar opciones de menú
+
+        // Armar y agregar el menú
         agregarMenu();
     }
 
@@ -75,7 +73,8 @@ public class EscenaMenu extends EscenaBase
         menu = new MenuScene(actividadJuego.camara);
         // Centrado en la pantalla
         menu.setPosition(ControlJuego.ANCHO_CAMARA/2,ControlJuego.ALTO_CAMARA/2);
-        // Crea las opciones (por ahora, acerca de y jugar)
+
+        // Crea las opciones (por ahora, acerca de y jugar) 1.5f escala seleccionado, 1 escala normal
         IMenuItem opcionAcercaDe = new ScaleMenuItemDecorator(new SpriteMenuItem(OPCION_ACERCA_DE,
                 regionBtnAcercaDe, actividadJuego.getVertexBufferObjectManager()), 1.5f, 1);
         IMenuItem opcionJugar = new ScaleMenuItemDecorator(new SpriteMenuItem(OPCION_JUGAR,
@@ -93,15 +92,15 @@ public class EscenaMenu extends EscenaBase
         opcionAcercaDe.setPosition(-200, 0);
         opcionJugar.setPosition(200, 0);
 
-        // Registra el Listener para atender las opciones
+        // Registra el listener para atender cada opción del menú
         menu.setOnMenuItemClickListener(new MenuScene.IOnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClicked(MenuScene pMenuScene, IMenuItem pMenuItem,
                                              float pMenuItemLocalX, float pMenuItemLocalY) {
-                // El parámetro pMenuItem indica la opción oprimida
+                // El parámetro pMenuItem indica la opción que se oprimió
                 switch(pMenuItem.getID()) {
                     case OPCION_ACERCA_DE:
-                        // Mostrar la escena de AcercaDe
+                        // Mostrar la escena AcercaDe
                         admEscenas.crearEscenaAcercaDe();
                         admEscenas.setEscena(TipoEscena.ESCENA_ACERCA_DE);
                         admEscenas.liberarEscenaMenu();
@@ -123,7 +122,7 @@ public class EscenaMenu extends EscenaBase
             }
         });
 
-        // Asigna este menú a la escena
+        // Agrega este menú a la escena
         setChildScene(menu);
     }
 
@@ -141,11 +140,13 @@ public class EscenaMenu extends EscenaBase
         // Salir del juego, no hacemos nada
     }
 
+    // Indice el tipo de escena que estamos implementando
     @Override
     public TipoEscena getTipoEscena() {
         return TipoEscena.ESCENA_MENU;
     }
 
+    // Libera los recursos asignados.
     @Override
     public void liberarEscena() {
         this.detachSelf();      // La escena se deconecta del engine
@@ -157,5 +158,9 @@ public class EscenaMenu extends EscenaBase
     public void liberarRecursos() {
         regionFondo.getTexture().unload();
         regionFondo = null;
+        regionBtnAcercaDe.getTexture().unload();
+        regionBtnAcercaDe = null;
+        regionBtnJugar.getTexture().unload();
+        regionBtnJugar = null;
     }
 }

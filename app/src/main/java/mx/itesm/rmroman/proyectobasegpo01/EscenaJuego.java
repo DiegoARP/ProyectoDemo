@@ -6,13 +6,14 @@ import org.andengine.entity.IEntity;
 import org.andengine.entity.modifier.JumpModifier;
 import org.andengine.entity.modifier.ParallelEntityModifier;
 import org.andengine.entity.modifier.RotationModifier;
+import org.andengine.entity.scene.CameraScene;
 import org.andengine.entity.scene.background.AutoParallaxBackground;
 import org.andengine.entity.scene.background.ParallaxBackground;
 import org.andengine.entity.sprite.AnimatedSprite;
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.input.sensor.acceleration.AccelerationData;
-import org.andengine.input.sensor.acceleration.IAccelerationListener;
 import org.andengine.input.touch.TouchEvent;
+import org.andengine.opengl.texture.ITexture;
 import org.andengine.opengl.texture.region.ITextureRegion;
 import org.andengine.opengl.texture.region.TiledTextureRegion;
 
@@ -21,17 +22,17 @@ import java.util.ArrayList;
 /**
  * Created by rmroman on 15/09/15.
  */
-public class EscenaJuego extends EscenaBase implements IAccelerationListener
+public class EscenaJuego extends EscenaBase
 {
     //Fondo
     private ITextureRegion regionFondo;
     private ITextureRegion regionFondoFrente;
     // Sprite animado
-    private AnimatedSprite spriteHeroe;
-    private TiledTextureRegion regionHeroeAnimado;
+    private AnimatedSprite spritePersonaje;
+    private TiledTextureRegion regionPersonajeAnimado;
 
     // Banderas
-    private boolean heroeSaltando = false;
+    private boolean personajeSaltando = false;
     private boolean juegoCorriendo = true;
 
     // Enemigos
@@ -48,43 +49,78 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener
     // Fin del juego
     private ITextureRegion regionFin;
 
+    // Escena de PAUSA
+    private CameraScene escenaPausa;    // La escena que se muestra al hacer pausa
+    private ITextureRegion regionPausa;
+    private ITextureRegion regionBtnPausa;
+
     @Override
     public void cargarRecursos() {
         regionFondo = cargarImagen("spaceFondo.jpg");
         regionFondoFrente = cargarImagen("starsFront.png");
-        regionHeroeAnimado = cargarImagenMosaico("kiki.png", 600, 158, 1, 4);
+        regionPersonajeAnimado = cargarImagenMosaico("kiki.png", 600, 158, 1, 4);
         regionEnemigo = cargarImagen("alienblaster.png");
         regionFin = cargarImagen("fin.png");
+        // Pausa
+        regionBtnPausa = cargarImagen("juego/btnPausa.png");
+        regionPausa = cargarImagen("juego/pausa.png");
     }
 
     @Override
     public void crearEscena() {
-
+        // Lista de enemigos que aparecen del lado derecho
         listaEnemigos = new ArrayList<>();
-
-        Sprite spriteFondo = cargarSprite(ControlJuego.ANCHO_CAMARA/2,
-                ControlJuego.ALTO_CAMARA/2, regionFondo);
-        //SpriteBackground fondo = new SpriteBackground(0,0,0,spriteFondo);
-        //setBackground(fondo);
 
         // Fondo animado
         AutoParallaxBackground fondoAnimado = new AutoParallaxBackground(1, 1, 1, 5);
-        fondoAnimado.attachParallaxEntity(new ParallaxBackground.ParallaxEntity(-3, spriteFondo));
-        //setBackground(fondoAnimado);
 
+        // Fondo atrás
+        Sprite spriteFondoAtras = cargarSprite(ControlJuego.ANCHO_CAMARA/2,
+                ControlJuego.ALTO_CAMARA/2, regionFondo);
+        fondoAnimado.attachParallaxEntity(new ParallaxBackground.ParallaxEntity(-3, spriteFondoAtras));
+        // Fondo frente
         Sprite spriteFondofrente = cargarSprite(ControlJuego.ANCHO_CAMARA/2,
                 ControlJuego.ALTO_CAMARA / 2, regionFondoFrente);
         fondoAnimado.attachParallaxEntity(new ParallaxBackground.ParallaxEntity(-8, spriteFondofrente));
 
         setBackground(fondoAnimado);
 
-        // Héroe animado
-        spriteHeroe = new AnimatedSprite(ControlJuego.ANCHO_CAMARA/2, ControlJuego.ALTO_CAMARA/2,
-                regionHeroeAnimado, actividadJuego.getVertexBufferObjectManager());
-        spriteHeroe.animate(200);
-        attachChild(spriteHeroe);
+        // Personaje animado
+        spritePersonaje = new AnimatedSprite(ControlJuego.ANCHO_CAMARA/2, ControlJuego.ALTO_CAMARA/2,
+                regionPersonajeAnimado, actividadJuego.getVertexBufferObjectManager());
+        spritePersonaje.animate(200);   // 200ms entre frames, 1000/200 fps
+        attachChild(spritePersonaje);
 
-        actividadJuego.getEngine().enableAccelerationSensor(actividadJuego, this);
+        // Crea el botón de PAUSA y lo agrega a la escena
+        Sprite btnPausa = new Sprite(regionBtnPausa.getWidth(), ControlJuego.ALTO_CAMARA - regionBtnPausa.getHeight(),
+                regionBtnPausa, actividadJuego.getVertexBufferObjectManager()) {
+            @Override
+            public boolean onAreaTouched(TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY) {
+                if (pSceneTouchEvent.isActionDown()) {
+                    pausarJuego();
+                }
+                return super.onAreaTouched(pSceneTouchEvent, pTouchAreaLocalX, pTouchAreaLocalY);
+            }
+        };
+        attachChild(btnPausa);
+        registerTouchArea(btnPausa);
+
+        // Crear la escena de PAUSA, pero NO lo agrega a la escena
+        escenaPausa = new CameraScene(actividadJuego.camara);
+        Sprite fondoPausa = cargarSprite(ControlJuego.ANCHO_CAMARA/2, ControlJuego.ALTO_CAMARA/2,
+                regionPausa);
+        escenaPausa.attachChild(fondoPausa);
+        escenaPausa.setBackgroundEnabled(false);
+    }
+
+    private void pausarJuego() {
+        if (juegoCorriendo) {
+            setChildScene(escenaPausa,false,true,false);
+            juegoCorriendo = false;
+        } else {
+            clearChildScene();
+            juegoCorriendo = true;
+        }
     }
 
     @Override
@@ -122,7 +158,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener
             }
 
             // Revisa si choca el personaje con el enemigo
-            if (spriteHeroe.collidesWith(enemigo.getSpriteEnemigo())) {
+            if (spritePersonaje.collidesWith(enemigo.getSpriteEnemigo())) {
                 detachChild(enemigo.getSpriteEnemigo());
                 listaEnemigos.remove(enemigo);
                 energia -= 10;
@@ -150,35 +186,35 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener
     @Override
     public boolean onSceneTouchEvent(TouchEvent pSceneTouchEvent) {
 
-        if (pSceneTouchEvent.isActionDown() && !heroeSaltando) {
-            heroeSaltando = true;
+        if (pSceneTouchEvent.isActionDown() && !personajeSaltando) {
+            personajeSaltando = true;
             // Animar sprite central
-            JumpModifier salto = new JumpModifier(1,spriteHeroe.getX(),spriteHeroe.getX(),
-                    spriteHeroe.getY(),spriteHeroe.getY(),-200);
+            JumpModifier salto = new JumpModifier(1, spritePersonaje.getX(), spritePersonaje.getX(),
+                    spritePersonaje.getY(), spritePersonaje.getY(),-200);
             RotationModifier rotacion = new RotationModifier(1, 360, 0);
             ParallelEntityModifier paralelo = new ParallelEntityModifier(salto,rotacion)
             {
                 @Override
                 protected void onModifierFinished(IEntity pItem) {
-                    heroeSaltando = false;
+                    personajeSaltando = false;
                     unregisterEntityModifier(this);
                     super.onModifierFinished(pItem);
                 }
             };
-            spriteHeroe.registerEntityModifier(paralelo);
+            spritePersonaje.registerEntityModifier(paralelo);
         }
 
         if (pSceneTouchEvent.isActionDown()) {
             // El usuario toca la pantalla
             float x = pSceneTouchEvent.getX();
             float y = pSceneTouchEvent.getY();
-            spriteHeroe.setPosition(x,y);
+            spritePersonaje.setPosition(x, y);
         }
         if (pSceneTouchEvent.isActionMove()) {
             // El usuario mueve el dedo sobre la pantalla
             float x = pSceneTouchEvent.getX();
             float y = pSceneTouchEvent.getY();
-            spriteHeroe.setPosition(x,y);
+            spritePersonaje.setPosition(x, y);
         }
         if (pSceneTouchEvent.isActionUp()) {
             // El usuario deja de tocar la pantalla
@@ -216,21 +252,15 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener
         regionFondo = null;
         regionFondoFrente.getTexture().unload();
         regionFondoFrente = null;
-        regionHeroeAnimado.getTexture().unload();
-        regionHeroeAnimado = null;
-    }
-
-    @Override
-    public void onAccelerationAccuracyChanged(AccelerationData pAccelerationData) {
-
-    }
-
-    @Override
-    public void onAccelerationChanged(AccelerationData pAccelerationData) {
-        float dx = pAccelerationData.getX();
-        float dy = pAccelerationData.getY();
-        float dz = pAccelerationData.getZ();
-        spriteHeroe.setX(spriteHeroe.getX()+dx );
-        //spriteHeroe.setY(spriteHeroe.getY() + dy + 5);
+        regionPersonajeAnimado.getTexture().unload();
+        regionPersonajeAnimado = null;
+        regionEnemigo.getTexture().unload();
+        regionEnemigo = null;
+        regionFin.getTexture().unload();
+        regionFin = null;
+        regionBtnPausa.getTexture().unload();
+        regionBtnPausa = null;
+        regionPausa.getTexture().unload();
+        regionPausa = null;
     }
 }
