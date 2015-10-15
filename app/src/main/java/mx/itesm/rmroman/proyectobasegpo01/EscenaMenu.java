@@ -55,7 +55,7 @@ public class EscenaMenu extends EscenaBase
         setBackgroundEnabled(true);
 
         // Mostrar un recuadro atrás del menú
-        agregarFondoMenu();
+        //agregarFondoMenu();
 
         // Armar y agregar el menú
         agregarMenu();

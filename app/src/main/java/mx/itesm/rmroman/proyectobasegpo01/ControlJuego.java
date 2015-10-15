@@ -2,6 +2,9 @@ package mx.itesm.rmroman.proyectobasegpo01;
 
 
 import android.view.KeyEvent;
+
+import org.andengine.engine.Engine;
+import org.andengine.engine.LimitedFPSEngine;
 import org.andengine.engine.camera.Camera;
 import org.andengine.engine.handler.timer.ITimerCallback;
 import org.andengine.engine.handler.timer.TimerHandler;
@@ -41,6 +44,12 @@ public class ControlJuego extends SimpleBaseGameActivity
         camara = new Camera(0,0,ANCHO_CAMARA,ALTO_CAMARA);
         return new EngineOptions(true, ScreenOrientation.LANDSCAPE_FIXED,
                 new FillResolutionPolicy(), camara);
+    }
+
+    @Override
+    public Engine onCreateEngine(EngineOptions pEngineOptions) {
+        Engine e = new LimitedFPSEngine(pEngineOptions,40);
+        return e;
     }
 
     // Crea los recursos del juego.
