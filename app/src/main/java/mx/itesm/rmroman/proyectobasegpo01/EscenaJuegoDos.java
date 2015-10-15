@@ -21,7 +21,7 @@ import java.util.ArrayList;
 /**
  * Created by rmroman on 15/09/15.
  */
-public class EscenaJuegoDos extends EscenaBase
+public class  EscenaJuegoDos extends EscenaBase
 {
     //Fondo
     private ITextureRegion regionFondo;
