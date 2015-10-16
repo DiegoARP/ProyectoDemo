@@ -144,7 +144,7 @@ public class  EscenaJuegoDos extends EscenaBase
     }
 
     private void pausarJuego() {
-        Log.i("pausarJuego", "pausando");
+        //Log.i("pausarJuego", "pausando");
         if (juegoCorriendo) {
             setChildScene(escenaPausa, false, true, false);
             juegoCorriendo = false;
