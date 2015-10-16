@@ -40,7 +40,7 @@ public class EscenaScrollHorizontal extends EscenaBase
     @Override
     public void crearEscena() {
 
-        Sprite spriteFondo = cargarSprite(ControlJuego.ANCHO_CAMARA / 2,
+        Sprite spriteFondo = cargarSprite(regionFondo.getWidth()/2,
                 ControlJuego.ALTO_CAMARA / 2, regionFondo);
         attachChild(spriteFondo);
 
@@ -58,25 +58,26 @@ public class EscenaScrollHorizontal extends EscenaBase
     @Override
     protected void onManagedUpdate(float pSecondsElapsed) {
 
-
-
-            if (direccion==Direccion.IZQUIERDA
-                    && personaje.getX()>ControlJuego.ANCHO_CAMARA/2) {
-                personaje.setX( personaje.getX()-5);
-            }
-            if (direccion==Direccion.DERECHA
-                    && personaje.getX()<regionFondo.getWidth()-ControlJuego.ANCHO_CAMARA) {
-                personaje.setX( personaje.getX()+5);
-            }
-        actividadJuego.camara.setCenter(personaje.getX(),ControlJuego.ALTO_CAMARA/2);
+        if (direccion == Direccion.IZQUIERDA
+                && personaje.getX() > ControlJuego.ANCHO_CAMARA / 2) {
+            personaje.setX(personaje.getX() - 5);
+            Log.i("onManagedUpdate","<pX = "+personaje.getX());
+        }
+        if (direccion == Direccion.DERECHA
+                && personaje.getX() < regionFondo.getWidth() - ControlJuego.ANCHO_CAMARA/2) {
+            personaje.setX(personaje.getX() + 5);
+            Log.i("onManagedUpdate", ">pX = " + personaje.getX());
+        }
+        actividadJuego.camara.setCenter(personaje.getX(), ControlJuego.ALTO_CAMARA / 2);
     }
-
 
     @Override
     public boolean onSceneTouchEvent(TouchEvent pSceneTouchEvent) {
-        Log.i("onTouch","TOUCH!!!!!");
+        actividadJuego.camara.convertSceneTouchEventToCameraSceneTouchEvent(pSceneTouchEvent);
+        Log.i("onTouch","x = " + pSceneTouchEvent.getX());
         if (pSceneTouchEvent.isActionDown() ) {
             if ( pSceneTouchEvent.getX()<ControlJuego.ANCHO_CAMARA/2) {
+                // Izquierda
                 direccion = Direccion.IZQUIERDA;
             } else {
                 // Derecha

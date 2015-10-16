@@ -227,9 +227,9 @@ public class  EscenaJuegoDos extends EscenaBase
             // porque se pueden borrar datos
             for (int k = listaEnemigos.size() - 1; k >= 0; k--) {
                 Enemigo enemigo = listaEnemigos.get(k);
-                if (proyectil.collidesWith(enemigo.getSpriteEnemigo())) {
+                if (proyectil.collidesWith(enemigo.getSprite())) {
                     // Lo destruye
-                    detachChild(enemigo.getSpriteEnemigo());
+                    detachChild(enemigo.getSprite());
                     listaEnemigos.remove(enemigo);
                     // desaparece el proyectil
                     detachChild(proyectil);
@@ -247,7 +247,7 @@ public class  EscenaJuegoDos extends EscenaBase
         for (Enemigo enemigo : listaEnemigos) { // Visita cada enemigo de la lista
             enemigo.mover(0, DX_ENEMIGOS);
             // Pregunta si algún enemigo se salió de la pantalla
-            if (!yaSalio && enemigo.getSpriteEnemigo().getY()>ControlJuego.ALTO_CAMARA || enemigo.getSpriteEnemigo().getY()<0) {
+            if (!yaSalio && enemigo.getSprite().getY()>ControlJuego.ALTO_CAMARA || enemigo.getSprite().getY()<0) {
                 yaSalio = true;
             } else {
                 // Genera un disparo al azar
@@ -264,8 +264,8 @@ public class  EscenaJuegoDos extends EscenaBase
 
     private void dispararEnemigo(Enemigo enemigo) {
         // Crearlo
-        Sprite spriteProyectil = cargarSprite(enemigo.getSpriteEnemigo().getX(),
-                enemigo.getSpriteEnemigo().getY(), regionBolaEnemigo);
+        Sprite spriteProyectil = cargarSprite(enemigo.getSprite().getX(),
+                enemigo.getSprite().getY(), regionBolaEnemigo);
         attachChild(spriteProyectil);   // Lo agrega a la escena
         listaProyectilesEnemigo.add(spriteProyectil);  // Lo agrega a la lista
     }

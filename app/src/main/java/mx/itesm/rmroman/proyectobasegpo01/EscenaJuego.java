@@ -11,9 +11,7 @@ import org.andengine.entity.scene.background.AutoParallaxBackground;
 import org.andengine.entity.scene.background.ParallaxBackground;
 import org.andengine.entity.sprite.AnimatedSprite;
 import org.andengine.entity.sprite.Sprite;
-import org.andengine.input.sensor.acceleration.AccelerationData;
 import org.andengine.input.touch.TouchEvent;
-import org.andengine.opengl.texture.ITexture;
 import org.andengine.opengl.texture.region.ITextureRegion;
 import org.andengine.opengl.texture.region.TiledTextureRegion;
 
@@ -143,7 +141,7 @@ public class EscenaJuego extends EscenaBase
                     (float)(Math.random()*ControlJuego.ALTO_CAMARA-regionEnemigo.getHeight())+regionEnemigo.getHeight(),regionEnemigo);
             Enemigo nuevoEnemigo = new Enemigo(spriteEnemigo);
             listaEnemigos.add(nuevoEnemigo);
-            attachChild(nuevoEnemigo.getSpriteEnemigo());
+            attachChild(nuevoEnemigo.getSprite());
             Log.i("Tamaño", "Datos: " + listaEnemigos.size());
         }
         // Actualizar cada uno de los listaEnemigos y ver si alguno ya salió de la pantalla
@@ -152,14 +150,14 @@ public class EscenaJuego extends EscenaBase
 
             enemigo.mover(-10,0);
 
-            if (enemigo.getSpriteEnemigo().getX()<-enemigo.getSpriteEnemigo().getWidth()) {
-                detachChild(enemigo.getSpriteEnemigo());
+            if (enemigo.getSprite().getX()<-enemigo.getSprite().getWidth()) {
+                detachChild(enemigo.getSprite());
                 listaEnemigos.remove(enemigo);
             }
 
             // Revisa si choca el personaje con el enemigo
-            if (spritePersonaje.collidesWith(enemigo.getSpriteEnemigo())) {
-                detachChild(enemigo.getSpriteEnemigo());
+            if (spritePersonaje.collidesWith(enemigo.getSprite())) {
+                detachChild(enemigo.getSprite());
                 listaEnemigos.remove(enemigo);
                 energia -= 10;
                 Log.i("ENERGIA","Energia: " + energia);
