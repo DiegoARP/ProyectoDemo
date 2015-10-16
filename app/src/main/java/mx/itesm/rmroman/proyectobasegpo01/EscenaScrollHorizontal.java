@@ -13,7 +13,7 @@ import org.andengine.opengl.texture.ITexture;
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
 import org.andengine.opengl.texture.region.ITextureRegion;
 
-import java.util.ArrayList;
+import java.text.DecimalFormat;
 
 /**
  * Created by rmroman on 15/09/15.
@@ -33,7 +33,10 @@ public class EscenaScrollHorizontal extends EscenaBase
     private Text textoFinal;
     private Text textoMedio;
     private IFont fontMonster;
-    private Text marcador;
+    private Text marcador; // Por ahora con tiempo
+
+    // Marcador (tiempo)
+    private float tiempo;
 
     // HUD (Heads-Up Display)
     private HUD hud;
@@ -43,7 +46,7 @@ public class EscenaScrollHorizontal extends EscenaBase
 
     @Override
     public void cargarRecursos() {
-        regionFondo = cargarImagen("scroll/fondoScroll2.jpg");
+        regionFondo = cargarImagen("scroll/fondoScroll.jpg");
         regionPersonaje = cargarImagen("scroll/runner.png");
         // Cargar font
         fontMonster = cargarFont("fonts/monster.ttf");
@@ -56,13 +59,13 @@ public class EscenaScrollHorizontal extends EscenaBase
     private Font cargarFont(String archivo) {
 
         // La imagen que contiene cada símbolo
-        final ITexture fontTexture = new BitmapTextureAtlas(actividadJuego.getEngine().getTextureManager(),512,256);
+        final ITexture fontTexture = new BitmapTextureAtlas(actividadJuego.getEngine().getTextureManager(),1024,256);
 
         // Carga el archivo, tamaño 36, antialias y color
         Font tipoLetra = FontFactory.createFromAsset(actividadJuego.getEngine().getFontManager(),
                 fontTexture, actividadJuego.getAssets(), archivo, 44, true, 0xFF00FF00);
         tipoLetra.load();
-        tipoLetra.prepareLetters("InicoFnalMed ".toCharArray());
+        tipoLetra.prepareLetters("InicoFnalMed 01234567890.".toCharArray());
 
         return tipoLetra;
     }
@@ -100,15 +103,15 @@ public class EscenaScrollHorizontal extends EscenaBase
         agregarTextos();
 
         // Agregar flechas
-        agregarFlechas();
+        agregarHUD();
     }
 
-    private void agregarFlechas() {
+
+    private void agregarHUD() {
         hud = new HUD();
         Sprite flechaIzq = new Sprite(100,100,regionIzquierda,actividadJuego.getVertexBufferObjectManager()) {
             @Override
             public boolean onAreaTouched(TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY) {
-                Log.i("onAreaTouch","Izquierda");
                 if ( pSceneTouchEvent.isActionDown()) {
                     direccion = Direccion.IZQUIERDA;
                 }
@@ -121,7 +124,6 @@ public class EscenaScrollHorizontal extends EscenaBase
         Sprite flechaDer = new Sprite(ControlJuego.ANCHO_CAMARA-100,100,regionDerecha,actividadJuego.getVertexBufferObjectManager()) {
             @Override
             public boolean onAreaTouched(TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY) {
-                Log.i("onAreaTouch","Derecha");
                 if ( pSceneTouchEvent.isActionDown()) {
                     direccion = Direccion.DERECHA;
                 }
@@ -130,6 +132,10 @@ public class EscenaScrollHorizontal extends EscenaBase
         };
         hud.attachChild(flechaDer);
         hud.registerTouchArea(flechaDer);
+
+        // Marcador/tiempo
+        marcador = new Text(ControlJuego.ANCHO_CAMARA/2,ControlJuego.ALTO_CAMARA-100,fontMonster,"  0  ",actividadJuego.getVertexBufferObjectManager());
+        hud.attachChild(marcador);
 
         actividadJuego.camara.setHUD(hud);
     }
@@ -162,6 +168,11 @@ public class EscenaScrollHorizontal extends EscenaBase
         textoInicial.setRotation(textoInicial.getRotation() + 1);
         textoFinal.setRotation(textoFinal.getRotation() + 6);
         textoMedio.setRotation(textoMedio.getRotation() + 3);
+
+        // Actualiza texto de marcador
+        tiempo += pSecondsElapsed;
+        DecimalFormat df = new DecimalFormat("##.##"); // Para formatear 2 decimales
+        marcador.setText(df.format(tiempo));
     }
 
     /*
