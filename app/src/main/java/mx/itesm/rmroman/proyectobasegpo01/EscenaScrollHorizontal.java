@@ -175,26 +175,6 @@ public class EscenaScrollHorizontal extends EscenaBase
         marcador.setText(df.format(tiempo));
     }
 
-    /*
-    @Override
-    public boolean onSceneTouchEvent(TouchEvent pSceneTouchEvent) {
-
-        actividadJuego.camara.convertSceneTouchEventToCameraSceneTouchEvent(pSceneTouchEvent);
-        if (pSceneTouchEvent.isActionDown() ) {
-            if ( pSceneTouchEvent.getX()<ControlJuego.ANCHO_CAMARA/2) {
-                // Izquierda
-                direccion = Direccion.IZQUIERDA;
-            } else {
-                // Derecha
-                direccion = Direccion.DERECHA;
-            }
-        }
-
-        return super.onSceneTouchEvent(pSceneTouchEvent);
-
-    }
-*/
-
     @Override
     public void onBackKeyPressed() {
         admEscenas.crearEscenaMenu();
