@@ -38,7 +38,7 @@ public class EscenaMenu extends EscenaBase
     @Override
     public void cargarRecursos() {
         // Fondo
-        regionFondo = cargarImagen("fondoMenu.jpg");
+        regionFondo = cargarImagen("fondoMenu2.png");
         // Botones del menú
         regionBtnAcercaDe = cargarImagen("btnAcercaDe.png");
         regionBtnJugar = cargarImagen("btnJugar.png");
@@ -108,6 +108,7 @@ public class EscenaMenu extends EscenaBase
 
                     case OPCION_JUGAR:
                         // Mostrar escena scroll
+
                         admEscenas.crearEscenaScroll();
                         admEscenas.setEscena(TipoEscena.ESCENA_SCROLL);
                         admEscenas.liberarEscenaMenu();

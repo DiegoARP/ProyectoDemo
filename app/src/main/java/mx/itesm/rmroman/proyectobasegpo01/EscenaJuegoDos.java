@@ -89,7 +89,7 @@ public class  EscenaJuegoDos extends EscenaBase
 
         Sprite spriteFondo = cargarSprite(ControlJuego.ANCHO_CAMARA / 2,
                 ControlJuego.ALTO_CAMARA / 2, regionFondo);
-        fondoAnimado.attachParallaxEntity(new ParallaxBackground.ParallaxEntity(-6, spriteFondo));
+        fondoAnimado.attachParallaxEntity(new ParallaxBackground.ParallaxEntity(6, spriteFondo));
 
         setBackground(fondoAnimado);
 
@@ -186,7 +186,6 @@ public class  EscenaJuegoDos extends EscenaBase
     private void actualizarVida() {
         // Dibuja el rectángulo proporcional a la vida
         rectVidaActual.setWidth(ControlJuego.ANCHO_CAMARA / 2 * vida / 100);
-        //rectVidaActual.setColor((int)(1-vida/100.0f+0.5f),(int)(vida/100.0f+0.5f),0);
         rectVidaActual.setColor(1-vida/100.0f,vida/100.0f,0);
     }
 

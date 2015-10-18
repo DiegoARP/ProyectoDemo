@@ -75,11 +75,11 @@ public class EscenaJuego extends EscenaBase
         // Fondo atrás
         Sprite spriteFondoAtras = cargarSprite(ControlJuego.ANCHO_CAMARA/2,
                 ControlJuego.ALTO_CAMARA/2, regionFondo);
-        fondoAnimado.attachParallaxEntity(new ParallaxBackground.ParallaxEntity(-3, spriteFondoAtras));
+        fondoAnimado.attachParallaxEntity(new ParallaxBackground.ParallaxEntity(3, spriteFondoAtras));
         // Fondo frente
         Sprite spriteFondofrente = cargarSprite(ControlJuego.ANCHO_CAMARA/2,
                 ControlJuego.ALTO_CAMARA / 2, regionFondoFrente);
-        fondoAnimado.attachParallaxEntity(new ParallaxBackground.ParallaxEntity(-8, spriteFondofrente));
+        fondoAnimado.attachParallaxEntity(new ParallaxBackground.ParallaxEntity(8, spriteFondofrente));
 
         setBackground(fondoAnimado);
 

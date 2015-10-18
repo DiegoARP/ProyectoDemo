@@ -152,7 +152,7 @@ public class AdministradorEscenas
     }
 
     public void liberarEscenaScroll() {
-        escenaScroll.liberarRecursos();
+        escenaScroll.liberarEscena();
         escenaScroll = null;
     }
 }
