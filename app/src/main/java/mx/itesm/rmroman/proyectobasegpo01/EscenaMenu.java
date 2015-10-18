@@ -107,11 +107,19 @@ public class EscenaMenu extends EscenaBase
                         break;
 
                     case OPCION_JUGAR:
-                        // Mostrar escena scroll
 
+
+                        // Escena de espera
+                        admEscenas.crearEscenaCargando();
+                        admEscenas.setEscena(TipoEscena.ESCENA_CARGANDO);
+                        admEscenas.liberarEscenaMenu();
+
+                        /*
+                        // Mostrar escena scroll
                         admEscenas.crearEscenaScroll();
                         admEscenas.setEscena(TipoEscena.ESCENA_SCROLL);
                         admEscenas.liberarEscenaMenu();
+                        */
 
                         // Mostrar la pantalla de juego
                         // JUEGO DOS

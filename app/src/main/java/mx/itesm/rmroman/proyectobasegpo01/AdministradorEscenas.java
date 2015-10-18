@@ -21,6 +21,7 @@ public class AdministradorEscenas
     private EscenaBase escenaJuego;
     private EscenaBase escenaHistoria;
     private EscenaBase escenaScroll;
+    private EscenaBase escenaCargando;
 
     // El tipo de escena que se está mostrando
     private TipoEscena tipoEscenaActual = TipoEscena.ESCENA_SPLASH;
@@ -82,6 +83,9 @@ public class AdministradorEscenas
                 break;
             case ESCENA_SCROLL:
                 setEscenaBase(escenaScroll);
+                break;
+            case ESCENA_CARGANDO:
+                setEscenaBase(escenaCargando);
                 break;
         }
     }
@@ -154,5 +158,17 @@ public class AdministradorEscenas
     public void liberarEscenaScroll() {
         escenaScroll.liberarEscena();
         escenaScroll = null;
+    }
+
+    //*** Crea la escena de cargando
+    public void crearEscenaCargando() {
+        // Carga los recursos
+        escenaCargando = new EscenaCargando();
+    }
+
+    //*** Libera la escena de cargando
+    public void liberarEscenaCargando() {
+        escenaCargando.liberarEscena();
+        escenaCargando = null;
     }
 }

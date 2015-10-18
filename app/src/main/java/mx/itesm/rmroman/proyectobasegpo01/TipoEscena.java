@@ -12,6 +12,7 @@ public enum TipoEscena {
     ESCENA_JUEGO,
     ESCENA_HISTORIA,
     ESCENA_SCROLL,
+    ESCENA_CARGANDO,
     ESCENA_JUEGO_DOS,
     ESCENA_FISICA
 }
