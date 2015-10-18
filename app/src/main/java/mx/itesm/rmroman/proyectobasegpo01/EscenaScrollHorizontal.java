@@ -1,7 +1,11 @@
 package mx.itesm.rmroman.proyectobasegpo01;
 
+import android.util.Log;
+
 import org.andengine.engine.camera.hud.HUD;
+import org.andengine.entity.IEntity;
 import org.andengine.entity.modifier.JumpModifier;
+import org.andengine.entity.modifier.ScaleModifier;
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.text.Text;
 import org.andengine.input.touch.TouchEvent;
@@ -11,6 +15,8 @@ import org.andengine.opengl.font.IFont;
 import org.andengine.opengl.texture.ITexture;
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
 import org.andengine.opengl.texture.region.ITextureRegion;
+import org.andengine.util.modifier.ease.EaseBounceIn;
+import org.andengine.util.modifier.ease.IEaseFunction;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -58,7 +64,7 @@ public class EscenaScrollHorizontal extends EscenaBase
         fontMonster = cargarFont("fonts/monster.ttf");
         regionDerecha = cargarImagen("scroll/flechaDer.png");
         regionIzquierda = cargarImagen("scroll/flechaIzq.png");
-        regionMoneda = cargarImagen("scroll/moneda.png");
+        regionMoneda = cargarImagen("scroll/bolaAcero.png");
     }
 
     // Crea y regresa un font que carga desde un archivo .ttf  (http://www.1001freefonts.com, http://www.1001fonts.com/)
@@ -224,15 +230,32 @@ public class EscenaScrollHorizontal extends EscenaBase
 
     private void actualizarMonedas() {
         for (int i=listaMonedas.size()-1; i>=0; i--) {
-            Sprite moneda = listaMonedas.get(i);
+            final Sprite moneda = listaMonedas.get(i);
             moneda.setRotation(moneda.getRotation()+5);
             // Prueba colisión
             if (personaje.collidesWith(moneda)) {
+                // Desaparecer moneda
+                desaparecerMoneda(moneda);
+            }
+            // Salen las monedas que han desaparecido
+            if (moneda.getScaleX()==0) {
                 valorMarcador += 100;
-                detachChild(moneda);
+                moneda.detachSelf();
                 listaMonedas.remove(moneda);
             }
         }
+    }
+
+    // Recude el tamaño hasta desaparecer
+    private void desaparecerMoneda(final Sprite monedaD) {
+        ScaleModifier escala = new ScaleModifier(0.3f,1,0) {
+            @Override
+            protected void onModifierFinished(IEntity pItem) {
+                unregisterEntityModifier(this);
+                super.onModifierFinished(pItem);
+            }
+        };
+        monedaD.registerEntityModifier(escala);
     }
 
     @Override
