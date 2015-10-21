@@ -273,6 +273,8 @@ public class EscenaScrollHorizontal extends EscenaBase
     @Override
     public void liberarEscena() {
         actividadJuego.camara.setHUD(null); // Quita el HUD de la cámara
+        // Centra la cámara en la posición original
+        actividadJuego.camara.setCenter(ControlJuego.ANCHO_CAMARA/2, ControlJuego.ALTO_CAMARA/2);
         liberarRecursos();
         this.detachSelf();
         this.dispose();
