@@ -34,6 +34,7 @@ public class EscenaScrollHorizontal extends EscenaBase
     private ITextureRegion regionPersonaje;
     private Direccion direccion;    // Izquierda, Derecha, etc...
     private boolean debeSaltar;
+    private boolean estaSaltando;
 
     // Textos a lo largo del mundo
     private Text textoInicial;
@@ -57,6 +58,11 @@ public class EscenaScrollHorizontal extends EscenaBase
     private ArrayList<Sprite> listaMonedas;
     private static final int NUM_MONEDAS = 30;
 
+    // Plataforma
+    private ITextureRegion regionPlataforma;
+    private Sprite plataforma;
+    private boolean estaSobrePlataforma = false;
+
     @Override
     public void cargarRecursos() {
         regionFondo = cargarImagen("scroll/fondoScroll.jpg");
@@ -65,6 +71,7 @@ public class EscenaScrollHorizontal extends EscenaBase
         regionDerecha = cargarImagen("scroll/flechaDer.png");
         regionIzquierda = cargarImagen("scroll/flechaIzq.png");
         regionMoneda = cargarImagen("scroll/bolaAcero.png");
+        regionPlataforma = cargarImagen("scroll/plataforma.jpg");
     }
 
     // Crea y regresa un font que carga desde un archivo .ttf  (http://www.1001freefonts.com, http://www.1001fonts.com/)
@@ -114,6 +121,15 @@ public class EscenaScrollHorizontal extends EscenaBase
         agregarHUD();
         // Agregar monedas
         agregarMonedas();
+
+        // Plataformas
+        agregarPlataformas();
+    }
+
+    private void agregarPlataformas() {
+        plataforma = cargarSprite(regionFondo.getWidth()/2, ControlJuego.ALTO_CAMARA/4, regionPlataforma);
+        attachChild(plataforma);
+        estaSobrePlataforma = false;
     }
 
     private void agregarMonedas() {
@@ -206,26 +222,92 @@ public class EscenaScrollHorizontal extends EscenaBase
 
         // Actualizar monedas y verificar colision
         actualizarMonedas();
+
+        // Verificar si cae sobre la plataforma
+        verificarPlataforma();
+
     }
 
-    private void saltarPersonaje() {
+    private void verificarPlataforma() {
+        if (!estaSobrePlataforma) {
+            if (personaje.collidesWith(plataforma) ) {
+                personaje.clearEntityModifiers();
+                //estaSaltando = false;
+                if (personaje.getY() > plataforma.getY()) {
+                    // Chocó por arriba
+                    estaSobrePlataforma = true;
+                    estaSaltando = false;
+                } else {
+                    // Choco por abajo, regresarlo al piso
+                    caer(0.1f,20);
+                }
+            }
+        } else {
+            // Está sobre la plataforma, ver que no caiga
+            if ( !personaje.collidesWith(plataforma) ) {
+                // debe caer
+                caer(1,200);
+                estaSobrePlataforma = false;
+            }
+        }
+    }
+
+    // Cae de la plataforma
+    private void caer(float tiempo, int dx) {
         float x = personaje.getX();
         float y = personaje.getY();
         float offset = 0;
 
         if (direccion == Direccion.IZQUIERDA
                 && personaje.getX() > ControlJuego.ANCHO_CAMARA / 2) {
-            offset = Math.min(personaje.getX() - ControlJuego.ANCHO_CAMARA / 2,300);
+            offset = Math.min(personaje.getX() - ControlJuego.ANCHO_CAMARA / 2,dx);
         }
         if (direccion == Direccion.DERECHA
                 && personaje.getX() < regionFondo.getWidth() - ControlJuego.ANCHO_CAMARA/2) {
             offset = Math.min(-personaje.getX() + regionFondo.getWidth()
-                    - ControlJuego.ANCHO_CAMARA/2,300);
+                    - ControlJuego.ANCHO_CAMARA/2,dx);
         }
 
         float x2 = direccion==Direccion.DERECHA?x+offset:x-offset;
-        JumpModifier salto = new JumpModifier(2, x, x2, y, y, -650);
+        float y2 = ControlJuego.ALTO_CAMARA/8;
+        JumpModifier salto = new JumpModifier(tiempo, x, x2, y, y2, 0){
+            @Override
+            protected void onModifierFinished(IEntity pItem) {
+                estaSaltando = false;
+                Log.i("modifier","regresó al piso");
+                super.onModifierFinished(pItem);
+            }
+        };
         personaje.registerEntityModifier(salto);
+    }
+
+    private void saltarPersonaje() {
+        if (!estaSaltando) {
+            estaSaltando = true;
+            float x = personaje.getX();
+            float y = personaje.getY();
+            float offset = 0;
+
+            if (direccion == Direccion.IZQUIERDA
+                    && personaje.getX() > ControlJuego.ANCHO_CAMARA / 2) {
+                offset = Math.min(personaje.getX() - ControlJuego.ANCHO_CAMARA / 2, 300);
+            }
+            if (direccion == Direccion.DERECHA
+                    && personaje.getX() < regionFondo.getWidth() - ControlJuego.ANCHO_CAMARA / 2) {
+                offset = Math.min(-personaje.getX() + regionFondo.getWidth()
+                        - ControlJuego.ANCHO_CAMARA / 2, 300);
+            }
+
+            float x2 = direccion == Direccion.DERECHA ? x + offset : x - offset;
+            JumpModifier salto = new JumpModifier(2, x, x2, y, y, -650){
+                @Override
+                protected void onModifierFinished(IEntity pItem) {
+                    estaSaltando = false;
+                    super.onModifierFinished(pItem);
+                }
+            };
+            personaje.registerEntityModifier(salto);
+        }
     }
 
     private void actualizarMonedas() {

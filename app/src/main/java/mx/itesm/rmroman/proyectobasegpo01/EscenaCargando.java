@@ -44,8 +44,8 @@ public class EscenaCargando extends EscenaBase
                     @Override
                     public void onTimePassed(TimerHandler pTimerHandler) {
                         actividadJuego.getEngine().unregisterUpdateHandler(pTimerHandler); // Invalida el timer
-                        admEscenas.crearEscenaScroll();
-                        admEscenas.setEscena(TipoEscena.ESCENA_SCROLL);
+                        admEscenas.crearEscenaJuego();
+                        admEscenas.setEscena(TipoEscena.ESCENA_JUEGO);
                         admEscenas.liberarEscenaCargando();
                     }
                 }));
