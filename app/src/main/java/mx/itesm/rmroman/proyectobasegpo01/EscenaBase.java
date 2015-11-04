@@ -5,6 +5,8 @@ import android.util.Log;
 import org.andengine.engine.camera.Camera;
 import org.andengine.entity.scene.Scene;
 import org.andengine.entity.sprite.Sprite;
+import org.andengine.opengl.font.Font;
+import org.andengine.opengl.font.FontFactory;
 import org.andengine.opengl.texture.ITexture;
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegionFactory;
@@ -84,6 +86,21 @@ public abstract class EscenaBase extends Scene
                 pGLState.enableDither();
             }
         };
+    }
+
+    // ***** Cargar un font, disponible para todas las escenas
+
+    // Crea y regresa un font que carga desde un archivo .ttf  (http://www.1001freefonts.com, http://www.1001fonts.com/)
+    protected Font cargarFont(String archivo, int tamanio, int color, String letras) {
+        // La imagen que contiene cada símbolo
+        final ITexture fontTexture = new BitmapTextureAtlas(actividadJuego.getEngine().getTextureManager(),512,256);
+        // Carga el archivo, tamaño 56, antialias y color
+        Font tipoLetra = FontFactory.createFromAsset(actividadJuego.getEngine().getFontManager(),
+                fontTexture, actividadJuego.getAssets(), archivo, tamanio, true, color);
+        tipoLetra.load();
+        tipoLetra.prepareLetters(letras.toCharArray());
+
+        return tipoLetra;
     }
 
     // Métodos abstractos

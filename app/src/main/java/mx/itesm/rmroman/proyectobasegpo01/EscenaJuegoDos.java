@@ -1,7 +1,5 @@
 package mx.itesm.rmroman.proyectobasegpo01;
 
-import android.util.Log;
-
 import org.andengine.entity.IEntity;
 import org.andengine.entity.modifier.JumpModifier;
 import org.andengine.entity.modifier.ParallelEntityModifier;
@@ -12,7 +10,9 @@ import org.andengine.entity.scene.background.AutoParallaxBackground;
 import org.andengine.entity.scene.background.ParallaxBackground;
 import org.andengine.entity.sprite.AnimatedSprite;
 import org.andengine.entity.sprite.Sprite;
+import org.andengine.entity.text.Text;
 import org.andengine.input.touch.TouchEvent;
+import org.andengine.opengl.font.IFont;
 import org.andengine.opengl.texture.region.ITextureRegion;
 import org.andengine.opengl.texture.region.TiledTextureRegion;
 
@@ -62,6 +62,11 @@ public class  EscenaJuegoDos extends EscenaBase
     private ITextureRegion regionPausa;
     private ITextureRegion regionBtnPausa;
 
+    // Puntos
+    private Text txtPuntos;
+    private IFont fontMonster;
+    private int puntos = 0;
+
     @Override
     public void cargarRecursos() {
         regionFondo = cargarImagen("spaceFondo.jpg");
@@ -75,6 +80,9 @@ public class  EscenaJuegoDos extends EscenaBase
         // Pausa
         regionBtnPausa = cargarImagen("juego/btnPausa.png");
         regionPausa = cargarImagen("juego/pausa.png");
+
+        // Puntos
+        fontMonster = cargarFont("fonts/monster.ttf",64,0xFFFFFF00,"Puntos: 0123456789");
     }
 
     @Override
@@ -84,6 +92,32 @@ public class  EscenaJuegoDos extends EscenaBase
         listaProyectilesEnemigo = new ArrayList<>();
         listaEnemigos = new ArrayList<>();
 
+        //  Agregar el fondo animado
+        agregarFondo();
+
+        // Agregar enemigos a la escena
+        crearEnemigos();
+
+        // Crear elementos de pausa
+        agregarPausa();
+
+        // Crear elementos de fin del juego
+        agregarFinJuego();
+
+        //setTouchAreaBindingOnActionDownEnabled(true);
+
+        // agregar barra de vida
+        agregarVida();
+
+        // agregarPuntos
+        agregarTextoPuntos();
+    }
+
+    private void agregarFinJuego() {
+
+    }
+
+    private void agregarFondo() {
         // Fondo animado
         AutoParallaxBackground fondoAnimado = new AutoParallaxBackground(1, 1, 1, 5);
 
@@ -98,15 +132,14 @@ public class  EscenaJuegoDos extends EscenaBase
                 regionPersonajeAnimado, actividadJuego.getVertexBufferObjectManager());
         spritePersonaje.animate(200);
         attachChild(spritePersonaje);
+    }
 
-        crearEnemigos();
-
+    private void agregarPausa() {
         // Crea el botón de PAUSA y lo agrega a la escena
         Sprite btnPausa = new Sprite(regionBtnPausa.getWidth()/2, ControlJuego.ALTO_CAMARA - regionBtnPausa.getHeight()/2,
                 regionBtnPausa, actividadJuego.getVertexBufferObjectManager()) {
             @Override
             public boolean onAreaTouched(TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY) {
-                //Log.i("onAreaTouched", "BTN Touch");
                 if (pSceneTouchEvent.isActionDown()) {
                     pausarJuego();
                     return true;
@@ -124,27 +157,32 @@ public class  EscenaJuegoDos extends EscenaBase
                 regionPausa);
         escenaPausa.attachChild(fondoPausa);
         escenaPausa.setBackgroundEnabled(false);
+    }
 
-        setTouchAreaBindingOnActionDownEnabled(true);
-
-        // Vida, puntos
+    private void agregarVida() {
+        // Vida
         ANCHO_VIDA = ControlJuego.ANCHO_CAMARA/2;
         vida = 100; // %
         // Fondo
         rectVida = new Rectangle(ControlJuego.ANCHO_CAMARA/2, ControlJuego.ALTO_CAMARA-50,
                 ANCHO_VIDA+10,ANCHO_VIDA/8,actividadJuego.getVertexBufferObjectManager());
-        rectVida.setColor(0,0,0,0.4f);
+        rectVida.setColor(0, 0, 0, 0.4f);
         attachChild(rectVida);
         // Nivel
         rectVidaActual = new Rectangle(ControlJuego.ANCHO_CAMARA/2, ControlJuego.ALTO_CAMARA-50,
                 ANCHO_VIDA,ANCHO_VIDA/8,actividadJuego.getVertexBufferObjectManager());
-        rectVidaActual.setColor(0,1,0);
+        rectVidaActual.setColor(0, 1, 0);
 
         attachChild(rectVidaActual);
     }
 
+    private void agregarTextoPuntos() {
+        txtPuntos = new Text(ControlJuego.ANCHO_CAMARA-200,ControlJuego.ALTO_CAMARA-30,
+                fontMonster,"Puntos: 0          ",actividadJuego.getVertexBufferObjectManager());
+        attachChild(txtPuntos);
+    }
+
     private void pausarJuego() {
-        //Log.i("pausarJuego", "pausando");
         if (juegoCorriendo) {
             setChildScene(escenaPausa, false, true, false);
             juegoCorriendo = false;
@@ -177,10 +215,20 @@ public class  EscenaJuegoDos extends EscenaBase
         actualizarProyectiles(pSecondsElapsed);
         actualizarProyectilesEnemigo();
         actualizarVida();
+        actualizarPuntos();
+
         if (vida<=0) {
             // PIERDE!!!
 
         }
+
+        if (listaEnemigos.size()==0) {
+            // GANA!!!
+        }
+    }
+
+    private void actualizarPuntos() {
+        txtPuntos.setText("Puntos: "+puntos);
     }
 
     private void actualizarVida() {
@@ -222,7 +270,7 @@ public class  EscenaJuegoDos extends EscenaBase
                 continue;
             }
             // Probar si colisionó con un enemigo
-            // Se visita cada proyectil dentro de la lista, se recorre con el índice
+            // Se visita cada enemigo dentro de la lista, se recorre con el índice
             // porque se pueden borrar datos
             for (int k = listaEnemigos.size() - 1; k >= 0; k--) {
                 Enemigo enemigo = listaEnemigos.get(k);
@@ -233,6 +281,8 @@ public class  EscenaJuegoDos extends EscenaBase
                     // desaparece el proyectil
                     detachChild(proyectil);
                     listaProyectiles.remove(proyectil);
+                    // Aumenta los puntos
+                    puntos += 100;
                     break;
                 }
             }
@@ -250,7 +300,7 @@ public class  EscenaJuegoDos extends EscenaBase
                 yaSalio = true;
             } else {
                 // Genera un disparo al azar
-                if (Math.random()<0.001) {
+                if (Math.random()<0.002) {
                     // Dispara
                     dispararEnemigo(enemigo);
                 }

@@ -108,7 +108,6 @@ public class EscenaMenu extends EscenaBase
 
                     case OPCION_JUGAR:
 
-
                         // Escena de espera
                         admEscenas.crearEscenaCargando();
                         admEscenas.setEscena(TipoEscena.ESCENA_CARGANDO);
