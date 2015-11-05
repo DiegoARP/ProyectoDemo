@@ -1,5 +1,9 @@
 package mx.itesm.rmroman.proyectobasegpo01;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.graphics.Rect;
+
 import org.andengine.entity.IEntity;
 import org.andengine.entity.modifier.JumpModifier;
 import org.andengine.entity.modifier.ParallelEntityModifier;
@@ -62,6 +66,11 @@ public class  EscenaJuegoDos extends EscenaBase
     private ITextureRegion regionPausa;
     private ITextureRegion regionBtnPausa;
 
+    // Escena FIN
+    private CameraScene escenaFin;
+    private  ITextureRegion regionBtnContinuar;
+    private ITextureRegion regionBtnSalir;
+
     // Puntos
     private Text txtPuntos;
     private IFont fontMonster;
@@ -80,7 +89,9 @@ public class  EscenaJuegoDos extends EscenaBase
         // Pausa
         regionBtnPausa = cargarImagen("juego/btnPausa.png");
         regionPausa = cargarImagen("juego/pausa.png");
-
+        // Fin del juego
+        regionBtnContinuar = cargarImagen("juego/continue.png");
+        regionBtnSalir = cargarImagen("juego/exit.png");
         // Puntos
         fontMonster = cargarFont("fonts/monster.ttf",64,0xFFFFFF00,"Puntos: 0123456789");
     }
@@ -114,6 +125,50 @@ public class  EscenaJuegoDos extends EscenaBase
     }
 
     private void agregarFinJuego() {
+        // Crear la escena de FIN, pero NO lo agrega a la escena
+        escenaFin = new CameraScene(actividadJuego.camara);
+        //Sprite fondoPausa = cargarSprite(ControlJuego.ANCHO_CAMARA / 2, ControlJuego.ALTO_CAMARA / 2,
+                //regionPausa);
+        Rectangle fondoFin = new Rectangle(ControlJuego.ANCHO_CAMARA/2, ControlJuego.ALTO_CAMARA/2,ControlJuego.ANCHO_CAMARA, ControlJuego.ALTO_CAMARA, actividadJuego.getVertexBufferObjectManager());
+        fondoFin.setColor(0xAA000000);
+        escenaFin.attachChild(fondoFin);
+
+        // Crea el botón de CONTINUE y lo agrega a la escena
+        Sprite btnContinuar = new Sprite(ControlJuego.ANCHO_CAMARA/2, ControlJuego.ALTO_CAMARA/2,
+                regionBtnContinuar, actividadJuego.getVertexBufferObjectManager()) {
+            @Override
+            public boolean onAreaTouched(TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY) {
+                if (pSceneTouchEvent.isActionDown()) {
+                    reiniciarJuego();
+                    return true;
+                }
+                return super.onAreaTouched(pSceneTouchEvent, pTouchAreaLocalX, pTouchAreaLocalY);
+            }
+        };
+        //btnContinuar.setAlpha(0.4f);
+        escenaFin.attachChild(btnContinuar);
+        escenaFin.registerTouchArea(btnContinuar);
+
+        // Crea el botón de SALIR y lo agrega a la escena
+        Sprite btnSalir = new Sprite(ControlJuego.ANCHO_CAMARA/2, ControlJuego.ALTO_CAMARA/4,
+                regionBtnSalir, actividadJuego.getVertexBufferObjectManager()) {
+            @Override
+            public boolean onAreaTouched(TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY) {
+                if (pSceneTouchEvent.isActionDown()) {
+                    onBackKeyPressed();
+                    return true;
+                }
+                return super.onAreaTouched(pSceneTouchEvent, pTouchAreaLocalX, pTouchAreaLocalY);
+            }
+        };
+        //btnContinuar.setAlpha(0.4f);
+        escenaFin.attachChild(btnSalir);
+        escenaFin.registerTouchArea(btnSalir);
+
+        escenaFin.setBackgroundEnabled(false);
+    }
+
+    private void reiniciarJuego() {
 
     }
 
@@ -156,6 +211,23 @@ public class  EscenaJuegoDos extends EscenaBase
         Sprite fondoPausa = cargarSprite(ControlJuego.ANCHO_CAMARA / 2, ControlJuego.ALTO_CAMARA / 2,
                 regionPausa);
         escenaPausa.attachChild(fondoPausa);
+
+        // Crea el botón de PAUSA y lo agrega a la escena
+        Sprite btnContinuar = new Sprite(ControlJuego.ANCHO_CAMARA/2, ControlJuego.ALTO_CAMARA/2,
+                regionBtnPausa, actividadJuego.getVertexBufferObjectManager()) {
+            @Override
+            public boolean onAreaTouched(TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY) {
+                if (pSceneTouchEvent.isActionDown()) {
+                    pausarJuego();
+                    return true;
+                }
+                return super.onAreaTouched(pSceneTouchEvent, pTouchAreaLocalX, pTouchAreaLocalY);
+            }
+        };
+        btnContinuar.setAlpha(0.4f);
+        escenaPausa.attachChild(btnContinuar);
+        escenaPausa.registerTouchArea(btnContinuar);
+
         escenaPausa.setBackgroundEnabled(false);
     }
 
@@ -192,6 +264,12 @@ public class  EscenaJuegoDos extends EscenaBase
         }
     }
 
+    private void terminarJuego() {
+        // Mostrar la pantalla de fin
+        setChildScene(escenaFin, false, true, false);
+        juegoCorriendo = false;
+    }
+
     private void crearEnemigos() {
         for (int x = 700; x <= 1200; x += 100) {
             for (int y = 100; y <= 700; y += 100) {
@@ -219,7 +297,7 @@ public class  EscenaJuegoDos extends EscenaBase
 
         if (vida<=0) {
             // PIERDE!!!
-
+            terminarJuego();
         }
 
         if (listaEnemigos.size()==0) {
@@ -228,7 +306,7 @@ public class  EscenaJuegoDos extends EscenaBase
     }
 
     private void actualizarPuntos() {
-        txtPuntos.setText("Puntos: "+puntos);
+        txtPuntos.setText("Puntos: " + puntos);
     }
 
     private void actualizarVida() {
@@ -300,7 +378,7 @@ public class  EscenaJuegoDos extends EscenaBase
                 yaSalio = true;
             } else {
                 // Genera un disparo al azar
-                if (Math.random()<0.002) {
+                if (Math.random()<0.003) {
                     // Dispara
                     dispararEnemigo(enemigo);
                 }
@@ -362,9 +440,24 @@ public class  EscenaJuegoDos extends EscenaBase
 
     @Override
     public void onBackKeyPressed() {
+
+        guardarMarcadorAlto();
+
         admEscenas.crearEscenaMenu();
         admEscenas.setEscena(TipoEscena.ESCENA_MENU);
         admEscenas.liberarEscenaJuego();
+    }
+
+    private void guardarMarcadorAlto() {
+        // Abre preferencias y ve si el marcador actual es mayor que el guardado
+        SharedPreferences preferencias = actividadJuego.getSharedPreferences("marcadorAlto", Context.MODE_PRIVATE);
+        int anterior = preferencias.getInt("puntos",0);
+        if (puntos>anterior) {
+            // Nuevo valor mayor, guardarlo
+            SharedPreferences.Editor editor = preferencias.edit();
+            editor.putInt("puntos",puntos);
+            editor.commit();
+        }
     }
 
     @Override

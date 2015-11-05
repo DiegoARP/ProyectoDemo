@@ -1,5 +1,7 @@
 package mx.itesm.rmroman.proyectobasegpo01;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.opengl.GLES20;
 
 import org.andengine.entity.IEntityFactory;
@@ -21,6 +23,8 @@ import org.andengine.entity.particle.modifier.RotationParticleModifier;
 import org.andengine.entity.particle.modifier.ScaleParticleModifier;
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.sprite.UncoloredSprite;
+import org.andengine.entity.text.Text;
+import org.andengine.opengl.font.IFont;
 import org.andengine.opengl.texture.ITexture;
 import org.andengine.opengl.texture.region.ITextureRegion;
 
@@ -38,11 +42,17 @@ public class EscenaAcercaDe extends EscenaBase
     private ITextureRegion regionBurbuja;
     private ITextureRegion regionHumo;
 
+    // Marcador alto
+    private Text txtMarcador;
+    private IFont fontMonster;
+
     @Override
     public void cargarRecursos() {
         regionFondo = cargarImagen("acercaDe/fondoAbout.png");
         regionBurbuja = cargarImagen("acercaDe/burbuja.png");
         regionHumo = cargarImagen("acercaDe/humo.png");
+        // Marcador
+        fontMonster = cargarFont("fonts/famirids.ttf",80,0xFF003366,"Marcdo my:0123456789");
     }
 
     @Override
@@ -50,9 +60,21 @@ public class EscenaAcercaDe extends EscenaBase
         spriteFondo = cargarSprite(ControlJuego.ANCHO_CAMARA/2, ControlJuego.ALTO_CAMARA/2, regionFondo);
         attachChild(spriteFondo);
 
+        agregarMarcadorAlto();
         agregarBurbujas();
         agregarFuego();
         agregarHumo();
+
+    }
+
+    private void agregarMarcadorAlto() {
+        // Obtener de las preferencias el marcador mayor
+        SharedPreferences preferencias = actividadJuego.getSharedPreferences("marcadorAlto", Context.MODE_PRIVATE);
+        int puntos = preferencias.getInt("puntos",0);
+
+        txtMarcador = new Text(ControlJuego.ANCHO_CAMARA/2,ControlJuego.ALTO_CAMARA-80,
+                fontMonster,"Marcador mayor: "+puntos,actividadJuego.getVertexBufferObjectManager());
+        attachChild(txtMarcador);
     }
 
     @Override
