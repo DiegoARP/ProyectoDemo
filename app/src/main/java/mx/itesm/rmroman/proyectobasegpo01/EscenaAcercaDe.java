@@ -65,6 +65,7 @@ public class EscenaAcercaDe extends EscenaBase
         agregarFuego();
         agregarHumo();
 
+        actividadJuego.reproducirMusica("audio/acerca.mp3",true);
     }
 
     private void agregarMarcadorAlto() {
@@ -78,7 +79,18 @@ public class EscenaAcercaDe extends EscenaBase
     }
 
     @Override
+    protected void onManagedUpdate(float pSecondsElapsed) {
+        super.onManagedUpdate(pSecondsElapsed);
+
+        spriteFondo.setSkew(0.5f, 0.1f);
+
+    }
+
+    @Override
     public void onBackKeyPressed() {
+
+        actividadJuego.detenerMusica();
+
         // Regresar al menú principal
         admEscenas.crearEscenaMenu();
         admEscenas.setEscena(TipoEscena.ESCENA_MENU);
@@ -100,6 +112,12 @@ public class EscenaAcercaDe extends EscenaBase
     public void liberarRecursos() {
         regionFondo.getTexture().unload();
         regionFondo = null;
+
+        regionBurbuja.getTexture().unload();
+        regionBurbuja = null;
+
+        regionHumo.getTexture().unload();
+        regionHumo = null;
     }
 
     private void agregarHumo() {

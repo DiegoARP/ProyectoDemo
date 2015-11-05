@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Rect;
 
+import org.andengine.audio.sound.Sound;
+import org.andengine.audio.sound.SoundFactory;
 import org.andengine.entity.IEntity;
 import org.andengine.entity.modifier.JumpModifier;
 import org.andengine.entity.modifier.ParallelEntityModifier;
@@ -20,6 +22,7 @@ import org.andengine.opengl.font.IFont;
 import org.andengine.opengl.texture.region.ITextureRegion;
 import org.andengine.opengl.texture.region.TiledTextureRegion;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -76,6 +79,9 @@ public class  EscenaJuegoDos extends EscenaBase
     private IFont fontMonster;
     private int puntos = 0;
 
+    // Efectos de sonido
+    private Sound sonidoDisparo;
+
     @Override
     public void cargarRecursos() {
         regionFondo = cargarImagen("spaceFondo.jpg");
@@ -94,6 +100,10 @@ public class  EscenaJuegoDos extends EscenaBase
         regionBtnSalir = cargarImagen("juego/exit.png");
         // Puntos
         fontMonster = cargarFont("fonts/monster.ttf",64,0xFFFFFF00,"Puntos: 0123456789");
+
+        //Efectos de sonido
+        sonidoDisparo = cargarEfecto("audio/disparoA.wav");
+        //.setVolume(0.5f,0.5f);
     }
 
     @Override
@@ -115,13 +125,14 @@ public class  EscenaJuegoDos extends EscenaBase
         // Crear elementos de fin del juego
         agregarFinJuego();
 
-        //setTouchAreaBindingOnActionDownEnabled(true);
-
         // agregar barra de vida
         agregarVida();
 
         // agregarPuntos
         agregarTextoPuntos();
+
+        // Reproduce música de fondo
+        actividadJuego.reproducirMusica("audio/espacio.mp3",true);
     }
 
     private void agregarFinJuego() {
@@ -378,7 +389,8 @@ public class  EscenaJuegoDos extends EscenaBase
                 yaSalio = true;
             } else {
                 // Genera un disparo al azar
-                if (Math.random()<0.003) {
+                double valor = Math.random();
+                if (valor<0.004 || (listaEnemigos.size()<10 && valor<0.01) )  {
                     // Dispara
                     dispararEnemigo(enemigo);
                 }
@@ -433,6 +445,7 @@ public class  EscenaJuegoDos extends EscenaBase
 
     private void dispararProyectil() {
         // Crearlo
+        sonidoDisparo.play();   // Reproduce efecto de disparo
         Sprite spriteProyectil = cargarSprite(spritePersonaje.getX(), spritePersonaje.getY(), regionProyectil);
         attachChild(spriteProyectil);   // Lo agrega a la escena
         listaProyectiles.add(spriteProyectil);  // Lo agrega a la lista

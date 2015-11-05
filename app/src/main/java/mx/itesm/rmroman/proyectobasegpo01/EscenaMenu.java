@@ -54,9 +54,6 @@ public class EscenaMenu extends EscenaBase
         setBackground(fondo);
         setBackgroundEnabled(true);
 
-        // Mostrar un recuadro atrás del menú
-        //agregarFondoMenu();
-
         // Armar y agregar el menú
         agregarMenu();
     }
@@ -73,7 +70,6 @@ public class EscenaMenu extends EscenaBase
         menu = new MenuScene(actividadJuego.camara);
         // Centrado en la pantalla
         menu.setPosition(ControlJuego.ANCHO_CAMARA/2,ControlJuego.ALTO_CAMARA/2);
-
         // Crea las opciones (por ahora, acerca de y jugar) 1.5f escala seleccionado, 1 escala normal
         IMenuItem opcionAcercaDe = new ScaleMenuItemDecorator(new SpriteMenuItem(OPCION_ACERCA_DE,
                 regionBtnAcercaDe, actividadJuego.getVertexBufferObjectManager()), 1.5f, 1);

@@ -3,6 +3,8 @@ package mx.itesm.rmroman.proyectobasegpo01;
 
 import android.view.KeyEvent;
 
+import org.andengine.audio.music.Music;
+import org.andengine.audio.music.MusicFactory;
 import org.andengine.engine.Engine;
 import org.andengine.engine.LimitedFPSEngine;
 import org.andengine.engine.camera.Camera;
@@ -33,6 +35,9 @@ public class ControlJuego extends SimpleBaseGameActivity
     // El administrador de escenas (se encarga de cambiar las escenas)
     private AdministradorEscenas admEscenas;
 
+    // MUSICA DE FONDO, los efectos de sonido se cargan en cada escena
+    private Music musica;
+
     /*
     Se crea la configuración del Engine.
     new FillResolutionPolicy() - Escala la cámara a lo ancho y alto de la pantalla
@@ -42,8 +47,11 @@ public class ControlJuego extends SimpleBaseGameActivity
     @Override
     public EngineOptions onCreateEngineOptions() {
         camara = new Camera(0,0,ANCHO_CAMARA,ALTO_CAMARA);
-        return new EngineOptions(true, ScreenOrientation.LANDSCAPE_FIXED,
+        EngineOptions opciones = new EngineOptions(true, ScreenOrientation.LANDSCAPE_FIXED,
                 new FillResolutionPolicy(), camara);
+        opciones.getAudioOptions().setNeedsSound(true);
+        opciones.getAudioOptions().setNeedsMusic(true);
+        return  opciones;
     }
 
     @Override
@@ -110,5 +118,49 @@ public class ControlJuego extends SimpleBaseGameActivity
         if (admEscenas!=null) {
             System.exit(0);
         }
+    }
+
+    // Reproducir música de fondo
+    public void reproducirMusica(String archivo, boolean loop) {
+        if (musica!=null) {
+            musica.stop();
+            musica.release();
+            musica = null;
+        }
+        // Carga el archivo mp3
+        try {
+            musica = MusicFactory.createMusicFromAsset(getMusicManager(),
+                    this, archivo);
+            musica.setLooping(loop);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+        musica.play();
+    }
+
+    public void detenerMusica() {
+        if (musica!=null) {
+            musica.stop();
+            musica.release();
+            musica = null;
+        }
+    }
+
+    // Ciclo de vida del juego
+    @Override
+    public synchronized void onResumeGame() {
+        if(musica != null && !musica.isPlaying()){
+            musica.play();
+        }
+        super.onResumeGame();
+    }
+
+    @Override
+    public synchronized void onPauseGame() {
+        if(musica != null && musica.isPlaying()){
+            musica.pause();
+        }
+        super.onPauseGame();
     }
 }
