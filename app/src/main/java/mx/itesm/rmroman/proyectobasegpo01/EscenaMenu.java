@@ -1,5 +1,7 @@
 package mx.itesm.rmroman.proyectobasegpo01;
 
+import android.util.Log;
+
 import org.andengine.engine.camera.Camera;
 import org.andengine.entity.primitive.Rectangle;
 import org.andengine.entity.scene.background.Background;
@@ -10,7 +12,9 @@ import org.andengine.entity.scene.menu.item.SpriteMenuItem;
 import org.andengine.entity.scene.menu.item.decorator.ScaleMenuItemDecorator;
 import org.andengine.entity.sprite.ButtonSprite;
 import org.andengine.entity.sprite.Sprite;
+import org.andengine.input.touch.TouchEvent;
 import org.andengine.opengl.texture.region.ITextureRegion;
+import org.andengine.opengl.texture.region.ITiledTextureRegion;
 import org.andengine.opengl.util.GLState;
 
 /**
@@ -35,6 +39,10 @@ public class EscenaMenu extends EscenaBase
     private final int OPCION_ACERCA_DE = 0;
     private final int OPCION_JUGAR = 1;
 
+    // SpriteButton con estado ON/OFF
+    private ButtonSprite btnEstado;
+    private ITiledTextureRegion regionBtnEstado; // Imagen de mosaico con dos estados: normal-prendido
+
     @Override
     public void cargarRecursos() {
         // Fondo
@@ -42,6 +50,7 @@ public class EscenaMenu extends EscenaBase
         // Botones del menú
         regionBtnAcercaDe = cargarImagen("btnAcercaDe.png");
         regionBtnJugar = cargarImagen("btnJugar.png");
+        regionBtnEstado = cargarImagenMosaico("onoff.png",300,225,1,2);
     }
 
     @Override
@@ -56,6 +65,33 @@ public class EscenaMenu extends EscenaBase
 
         // Armar y agregar el menú
         agregarMenu();
+
+        // Agregar botón de estado (prendido-apagado)
+        agregarEstado();
+    }
+
+    private void agregarEstado() {
+
+        // Toggle button
+        btnEstado = new ButtonSprite(ControlJuego.ANCHO_CAMARA-200, ControlJuego.ALTO_CAMARA-200,
+                regionBtnEstado,actividadJuego.getVertexBufferObjectManager()) {
+            @Override
+            public boolean onAreaTouched(TouchEvent pSceneTouchEvent, float pTouchAreaLocalX, float pTouchAreaLocalY) {
+
+                if (pSceneTouchEvent.isActionDown()) {
+                    // Cambia el índice entre 0 y 1 ed manera alternada
+                    btnEstado.setCurrentTileIndex((btnEstado.getCurrentTileIndex()+1)%2);
+                }
+                // 0-NORMAL, 1-PRESIONADO
+                Log.i("Estado del botón", "" + btnEstado.getCurrentTileIndex());
+                return false; // Regresa falso para que Android no cambie el botón
+            }
+        };
+        // El estado inicial del botón se lee desde las preferencias o se toma un valor por default
+        // en este demo, siempre inicia prendido
+        btnEstado.setCurrentTileIndex(1);
+        registerTouchArea(btnEstado);
+        attachChild(btnEstado);
     }
 
     private void agregarFondoMenu() {
