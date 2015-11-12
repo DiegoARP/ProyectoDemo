@@ -28,6 +28,10 @@ import org.andengine.opengl.font.IFont;
 import org.andengine.opengl.texture.ITexture;
 import org.andengine.opengl.texture.region.ITextureRegion;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
 /**
  * Created by rmroman on 11/09/15.
  */
@@ -46,13 +50,21 @@ public class EscenaAcercaDe extends EscenaBase
     private Text txtMarcador;
     private IFont fontMonster;
 
+    // Créditos
+    private Text txtCreditos;
+    private BufferedReader entrada;
+    private float tiempo;
+    private StringBuffer sb;
+    private StringBuffer textoActual;
+    private int indice;
+
     @Override
     public void cargarRecursos() {
         regionFondo = cargarImagen("acercaDe/fondoAbout.png");
         regionBurbuja = cargarImagen("acercaDe/burbuja.png");
         regionHumo = cargarImagen("acercaDe/humo.png");
         // Marcador
-        fontMonster = cargarFont("fonts/famirids.ttf",80,0xFF003366,"Marcdo my:0123456789");
+        fontMonster = cargarFont("fonts/robot.ttf",48,0xFF003366,"ABCDEFGHIJKLMNOPQRSTUVWXYZ, ");
     }
 
     @Override
@@ -65,7 +77,31 @@ public class EscenaAcercaDe extends EscenaBase
         agregarFuego();
         agregarHumo();
 
-        actividadJuego.reproducirMusica("audio/acerca.mp3",true);
+        actividadJuego.reproducirMusica("audio/acerca.mp3", true);
+
+        agregarTextoCreditos();
+    }
+
+    private void agregarTextoCreditos() {
+        txtCreditos = new Text(600,700,fontMonster,
+                "Hola\nMundo",1024,actividadJuego.getVertexBufferObjectManager());
+        txtCreditos.setAnchorCenter(0.5f,1);
+        attachChild(txtCreditos);
+
+        sb = new StringBuffer();
+        textoActual = new StringBuffer();
+        // Abre archivo
+        try {
+            entrada = new BufferedReader(new InputStreamReader(actividadJuego.getAssets().open("textoCreditos.txt")));
+            while ( entrada.ready() ) {
+                sb.append(entrada.readLine());
+                sb.append("\n");
+            }
+            indice = 0;
+            entrada.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void agregarMarcadorAlto() {
@@ -84,6 +120,13 @@ public class EscenaAcercaDe extends EscenaBase
 
         spriteFondo.setSkew(0.5f, 0.1f);
 
+        tiempo += pSecondsElapsed;
+        if (tiempo > 0.2) {
+            tiempo = 0;
+            textoActual.append(sb.charAt(indice));
+            txtCreditos.setText(textoActual.toString());
+            indice++;
+        }
     }
 
     @Override

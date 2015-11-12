@@ -103,7 +103,7 @@ public class  EscenaJuegoDos extends EscenaBase
 
         //Efectos de sonido
         sonidoDisparo = cargarEfecto("audio/disparoA.wav");
-        //.setVolume(0.5f,0.5f);
+        //sonido.setVolume(0.5f,0.5f);
     }
 
     @Override
